@@ -1,9 +1,10 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from config import settings
 from database import engine, Base
 import models, schemas, database
 from sqlalchemy.orm import Session
+import security
 
 app = FastAPI()
 
@@ -53,3 +54,25 @@ def create_memoria(memoria: schemas.MemoriaCreate, db: Session = Depends(databas
 def read_memorias(db: Session = Depends(database.get_db)):
     memorys = db.query(models.MemoriaModel).all()
     return memorys
+
+@app.post("/signup", response_model=schemas.Usuario, status_code=status.HTTP_201_CREATED)
+def create_user(usuario: schemas.UsuarioCreate, db: Session = Depends(database.get_db)):
+    db_user = db.query(models.UsuarioModel).filter(models.UsuarioModel.email == usuario.email).first()
+    if db_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Este email ja esta cadastrado."
+        )
+    hashed_pass = security.hash_password(usuario.password)
+
+    new_user = models.UsuarioModel(
+        nome=usuario.nome,
+        email=usuario.email,
+        hashed_password=hashed_pass
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
