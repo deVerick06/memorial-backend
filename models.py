@@ -9,3 +9,11 @@ class HomenagemModel(Base):
     nome = Column(String(100), nullable=False)
     mensagem = Column(Text, nullable=False)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
+
+class MemoriaModel(Base):
+    __tablename__ = "memorias"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    criado_em = Column(DateTime(timezone=True), server_default=func.now())
