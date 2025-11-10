@@ -16,3 +16,17 @@ class Homenagem(HomenagemBase):
 
     class Config:
         from_attributes = True
+
+class MemoriaBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+class MemoriaCreate(MemoriaBase):
+    pass
+
+class Memoria(MemoriaBase):
+    id: int
+    criado_em: datetime
+
+    class Config:
+        from_attributes = True
