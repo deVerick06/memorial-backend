@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
 
@@ -25,6 +25,20 @@ class MemoriaCreate(MemoriaBase):
     pass
 
 class Memoria(MemoriaBase):
+    id: int
+    criado_em: datetime
+
+    class Config:
+        from_attributes = True
+
+class UsuarioBase(BaseModel):
+    nome: str
+    email: EmailStr
+
+class UsuarioCreate(UsuarioBase):
+    password: str
+
+class Usuario(UsuarioBase):
     id: int
     criado_em: datetime
 
