@@ -37,3 +37,19 @@ def create_homenagem(homenagem: schemas.HomenagemCreate, db: Session = Depends(d
 def read_homenagens(db: Session = Depends(database.get_db)):
     homenagens = db.query(models.HomenagemModel).all()
     return homenagens
+
+@app.post("/memorias/", response_model=schemas.Memoria)
+def create_memoria(memoria: schemas.MemoriaCreate, db: Session = Depends(database.get_db)):
+    new_memory = models.MemoriaModel(
+        title=memoria.title,
+        description=memoria.description
+    )
+    db.add(new_memory)
+    db.commit()
+    db.refresh(new_memory)
+    return new_memory
+
+@app.get("/memorias/", response_model=list[schemas.Memoria])
+def read_memorias(db: Session = Depends(database.get_db)):
+    memorys = db.query(models.MemoriaModel).all()
+    return memorys
