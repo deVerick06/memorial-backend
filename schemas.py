@@ -5,7 +5,7 @@ from typing import Optional
 class HomenagemBase(BaseModel):
     nome: str
     mensagem: str
-    imagem_url: Optional[str] = None
+    image_url: Optional[str] = None
 
 class HomenagemCreate(HomenagemBase):
     pass 
@@ -20,6 +20,7 @@ class Homenagem(HomenagemBase):
 class MemoriaBase(BaseModel):
     title: str
     description: Optional[str] = None
+    image_url: Optional[str] = None
 
 class MemoriaCreate(MemoriaBase):
     pass

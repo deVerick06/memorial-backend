@@ -9,6 +9,7 @@ class HomenagemModel(Base):
     nome = Column(String(100), nullable=False)
     mensagem = Column(Text, nullable=False)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
+    image_url = Column(String(512), nullable=True)
 
 class MemoriaModel(Base):
     __tablename__ = "memorias"
@@ -17,6 +18,7 @@ class MemoriaModel(Base):
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
+    image_url = Column(String(512), nullable=True)
 
 class UsuarioModel(Base):
     __tablename__ = "usuarios"
