@@ -6,6 +6,9 @@ import models, schemas, database
 from sqlalchemy.orm import Session
 import security
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import UploadFile, File
+import storage_client
+import uuid
 
 app = FastAPI()
 
@@ -111,3 +114,33 @@ def login_for_access_token(
         subject=usuario.email
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/upload-image/")
+def upload_image(
+    file: UploadFile = File(...),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    """
+    Recebe um arquivo de imagem, Salva no Storage e retorna a URL publica.
+    """
+    try:
+        file_ext = file.filename.split(".")[-1]
+        file_name = f"{uuid.uuid4()}.{file_ext}"
+
+        bucket_path = f"imagem/{file_name}"
+
+        storage_client.storage_client.from_("imagem").upload(
+            path=file_name,
+            file=file.file.read(),
+            file_options={"content-type": file.content_type}
+        )
+
+        public_url = storage_client.storage_client.from_("imagem").get_public_url(file_name)
+
+        return {"image_url": public_url}
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao fazer upload da imagem: {str(e)}"
+        )
