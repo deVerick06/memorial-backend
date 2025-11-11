@@ -1,6 +1,7 @@
 from passlib.context import CryptContext
+import argon2
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica se a senha pura corresponde ao hash salvo."""
