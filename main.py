@@ -41,7 +41,11 @@ def read_homenagens(db: Session = Depends(database.get_db)):
     return homenagens
 
 @app.post("/memorias/", response_model=schemas.Memoria)
-def create_memoria(memoria: schemas.MemoriaCreate, db: Session = Depends(database.get_db)):
+def create_memoria(
+    memoria: schemas.MemoriaCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
     new_memory = models.MemoriaModel(
         title=memoria.title,
         description=memoria.description
