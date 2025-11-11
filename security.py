@@ -69,7 +69,7 @@ def get_current_user(
         if email is None:
             raise credentials_exception
     
-    except jwt.PyJWTError :
+    except jwt.JWTError :
         raise credentials_exception
     
     user = db.query(models.UsuarioModel).filter(models.UsuarioModel.email == email).first()
