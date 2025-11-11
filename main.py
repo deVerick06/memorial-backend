@@ -25,7 +25,11 @@ app.add_middleware(
 models.Base.metadata.create_all(bind=engine)
 
 @app.post("/homenagens/", response_model=schemas.Homenagem)
-def create_homenagem(homenagem: schemas.HomenagemCreate, db: Session = Depends(database.get_db)):
+def create_homenagem(
+    homenagem: schemas.HomenagemCreate, 
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
     nova_homenagem = models.HomenagemModel(
         nome=homenagem.nome,
         mensagem=homenagem.mensagem
@@ -36,7 +40,10 @@ def create_homenagem(homenagem: schemas.HomenagemCreate, db: Session = Depends(d
     return nova_homenagem
 
 @app.get("/homenagens/", response_model=list[schemas.Homenagem])
-def read_homenagens(db: Session = Depends(database.get_db)):
+def read_homenagens(
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
     homenagens = db.query(models.HomenagemModel).all()
     return homenagens
 
@@ -56,7 +63,10 @@ def create_memoria(
     return new_memory
 
 @app.get("/memorias/", response_model=list[schemas.Memoria])
-def read_memorias(db: Session = Depends(database.get_db)):
+def read_memorias(
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
     memorys = db.query(models.MemoriaModel).all()
     return memorys
 
