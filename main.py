@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 import security
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import UploadFile, File
-import storage_client
+from storage_client import supabase_client
 import uuid
 
 app = FastAPI()
@@ -35,7 +35,8 @@ def create_homenagem(
 ):
     nova_homenagem = models.HomenagemModel(
         nome=homenagem.nome,
-        mensagem=homenagem.mensagem
+        mensagem=homenagem.mensagem,
+        image_url=homenagem.image_url
     )
     db.add(nova_homenagem)
     db.commit()
@@ -58,7 +59,8 @@ def create_memoria(
 ):
     new_memory = models.MemoriaModel(
         title=memoria.title,
-        description=memoria.description
+        description=memoria.description,
+        image_url=memoria.image_url
     )
     db.add(new_memory)
     db.commit()
@@ -120,27 +122,32 @@ def upload_image(
     file: UploadFile = File(...),
     current_user: models.UsuarioModel = Depends(security.get_current_user)
 ):
-    """
-    Recebe um arquivo de imagem, Salva no Storage e retorna a URL publica.
-    """
+    print("--- ROTA /upload-image/ CHAMADA ---") 
     try:
+
+        bucket_name = "imagem" 
+
         file_ext = file.filename.split(".")[-1]
         file_name = f"{uuid.uuid4()}.{file_ext}"
 
-        bucket_path = f"imagem/{file_name}"
+        print(f"Tentando upload para o balde: {bucket_name}, com o nome: {file_name}")
 
-        storage_client.storage_client.from_("imagem").upload(
+        supabase_client.storage.from_(bucket_name).upload(
             path=file_name,
             file=file.file.read(),
             file_options={"content-type": file.content_type}
         )
+        print("--- Upload no Supabase CONCLUÍDO ---")
 
-        public_url = storage_client.storage_client.from_("imagem").get_public_url(file_name)
+        public_url = supabase_client.storage.from_(bucket_name).get_public_url(file_name)
+        print(f"URL pública gerada: {public_url}")
 
         return {"image_url": public_url}
-    
+
     except Exception as e:
+
+        print(f"!!! ERRO NO UPLOAD: {repr(e)}") 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao fazer upload da imagem: {str(e)}"
+            detail=f"Erro ao fazer upload: {repr(e)}" 
         )
