@@ -199,3 +199,19 @@ def read_users_me(
     current_user: models.UsuarioModel = Depends(security.get_current_user)
 ):
     return current_user
+
+@app.delete("/homenagens/{homenagem_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_homenagem(
+    homenagem_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    homenagem_db = db.query(models.HomenagemModel).filter(models.HomenagemModel.id == homenagem_id).first()
+    if homenagem_db is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Homenagem não encontrada"
+        )
+    db.delete(homenagem_db)
+    db.commit()
+    return
