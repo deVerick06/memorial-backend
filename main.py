@@ -170,3 +170,26 @@ def delete_memoria(
     db.commit()
 
     return
+
+@app.put("/memorias/{memoria_id}", response_model=schemas.Memoria)
+def update_memoria(
+    memoria_id: int,
+    memoria_data: schemas.MemoriaCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    memoria_db = db.query(models.MemoriaModel).filter(models.MemoriaModel.id == memoria_id).first()
+
+    if memoria_db is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Memória não encontrada"
+        )
+    
+    memoria_db.title = memoria_data.title
+    memoria_db.description = memoria_data.description
+
+    db.commit()
+    db.refresh(memoria_db)
+
+    return memoria_db
