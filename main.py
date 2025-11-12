@@ -215,3 +215,23 @@ def delete_homenagem(
     db.delete(homenagem_db)
     db.commit()
     return
+
+@app.put("/homenagens/{homenagem_id}")
+def update_homenagem(
+    homenagem_id: int,
+    homenagem_data: schemas.HomenagemCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    homenagem_db = db.query(models.HomenagemModel).filter(models.HomenagemModel.id == homenagem_id).first()
+    if homenagem_db is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Homenagem não encontrada"
+        )
+    homenagem_db.nome = homenagem_data.nome
+    homenagem_db.mensagem = homenagem_data.mensagem
+
+    db.commit()
+    db.refresh(homenagem_db)
+    return homenagem_db
