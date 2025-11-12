@@ -151,3 +151,22 @@ def upload_image(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erro ao fazer upload: {repr(e)}" 
         )
+    
+@app.delete("/memorias/{memoria_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_memoria(
+    memoria_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    memoria_db = db.query(models.MemoriaModel).filter(models.MemoriaModel.id == memoria_id).first()
+
+    if memoria_db is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Memória não encontrada"
+        )
+    
+    db.delete(memoria_db)
+    db.commit()
+
+    return
