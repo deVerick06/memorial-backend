@@ -193,3 +193,9 @@ def update_memoria(
     db.refresh(memoria_db)
 
     return memoria_db
+
+@app.get("/users/me", response_model=schemas.Usuario)
+def read_users_me(
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    return current_user
