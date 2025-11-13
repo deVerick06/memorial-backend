@@ -13,6 +13,7 @@ class HomenagemCreate(HomenagemBase):
 class Homenagem(HomenagemBase):
     id: int
     criado_em: datetime
+    owner_id: int
 
     class Config:
         from_attributes = True
@@ -28,6 +29,7 @@ class MemoriaCreate(MemoriaBase):
 class Memoria(MemoriaBase):
     id: int
     criado_em: datetime
+    owner_id: int
 
     class Config:
         from_attributes = True
