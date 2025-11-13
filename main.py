@@ -74,7 +74,7 @@ def read_memorias(
     db: Session = Depends(database.get_db),
     current_user: models.UsuarioModel = Depends(security.get_current_user)
 ):
-    memorys = db.query(models.MemoriaModel).all()
+    memorys = db.query(models.MemoriaModel).filter(models.MemoriaModel.owner_id == current_user.id).all()
     return memorys
 
 @app.post("/signup", response_model=schemas.Usuario, status_code=status.HTTP_201_CREATED)
