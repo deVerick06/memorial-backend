@@ -36,7 +36,8 @@ def create_homenagem(
     nova_homenagem = models.HomenagemModel(
         nome=homenagem.nome,
         mensagem=homenagem.mensagem,
-        image_url=homenagem.image_url
+        image_url=homenagem.image_url,
+        owner_id = current_user.id
     )
     db.add(nova_homenagem)
     db.commit()
@@ -60,7 +61,8 @@ def create_memoria(
     new_memory = models.MemoriaModel(
         title=memoria.title,
         description=memoria.description,
-        image_url=memoria.image_url
+        image_url=memoria.image_url,
+        owner_id = current_user.id
     )
     db.add(new_memory)
     db.commit()
