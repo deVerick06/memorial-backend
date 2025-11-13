@@ -167,6 +167,11 @@ def delete_memoria(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Memória não encontrada"
         )
+    if memoria_db.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Operação não permitida"
+        )
     
     db.delete(memoria_db)
     db.commit()
@@ -186,6 +191,11 @@ def update_memoria(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Memória não encontrada"
+        )
+    if memoria_db.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Operação não permitida"
         )
     
     memoria_db.title = memoria_data.title
@@ -214,6 +224,12 @@ def delete_homenagem(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Homenagem não encontrada"
         )
+    
+    if homenagem_db.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Operação não permitida"
+        )
     db.delete(homenagem_db)
     db.commit()
     return
@@ -230,6 +246,12 @@ def update_homenagem(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Homenagem não encontrada"
+        )
+    
+    if homenagem_db.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Operação não permitida"
         )
     homenagem_db.nome = homenagem_data.nome
     homenagem_db.mensagem = homenagem_data.mensagem
