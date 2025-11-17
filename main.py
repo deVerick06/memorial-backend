@@ -49,8 +49,37 @@ def read_homenagens(
     db: Session = Depends(database.get_db),
     current_user: models.UsuarioModel = Depends(security.get_current_user)
 ):
-    homenagens = db.query(models.HomenagemModel).all()
-    return homenagens
+    homenagens_db = db.query(models.HomenagemModel).all()
+
+    resultado = []
+    for h in homenagens_db:
+        lit = any(v.user_id == current_user.id for v in h.velas)
+        formatted_comments = []
+        for c in h.comentarios:
+            comment_owner = db.query(models.UsuarioModel).filter(models.UsuarioModel.id == c.user_id).first()
+            nome = comment_owner.nome if comment_owner else "Desconhecido"
+
+            formatted_comments.append({
+                "id": c.id,
+                "texto": c.texto,
+                "user_id": c.user_id,
+                "homenagem_id": c.homenagem_id,
+                "criado_em": c.criado_em,
+                "nome_usuario": nome
+            })
+        h_schema = {
+            "id": h.id,
+            "nome": h.nome,
+            "mensagem": h.mensagem,
+            "image_url": h.image_url,
+            "owner_id": h.owner_id,
+            "criado_em": h.criado_em,
+            "total_velas": len(h.velas),
+            "velas_acesas_por_mim": lit,
+            "comentarios": formatted_comments
+        }
+        resultado.append(h_schema)
+    return resultado
 
 @app.post("/memorias/", response_model=schemas.Memoria)
 def create_memoria(
@@ -259,3 +288,49 @@ def update_homenagem(
     db.commit()
     db.refresh(homenagem_db)
     return homenagem_db
+
+@app.post("/homenagens/{homenagem_id}/vela")
+def toggle_vela(
+    homenagem_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    vela_existing = db.query(models.VelaModel).filter(
+        models.VelaModel.user_id == current_user.id,
+        models.VelaModel.homenagem_id == homenagem_id
+    ).first()
+
+    if vela_existing:
+        db.delete(vela_existing)
+        db.commit()
+        return {"status": "apagada"}
+    else:
+        new_vela = models.VelaModel(user_id=current_user.id, homenagem_id=homenagem_id)
+        db.add(new_vela)
+        db.commit()
+        return {"status": "acesa"}
+
+@app.post("/homenagens/{homenagem_id}/comentarios", response_model=schemas.Comentario)
+def create_comentario(
+    homenagem_id: int,
+    comentarios: schemas.ComentarioCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    new_comentario = models.ComentarioModel(
+        texto=comentarios.texto,
+        user_id=current_user.id,
+        homenagem_id=homenagem_id
+    )
+    db.add(new_comentario)
+    db.commit()
+    db.refresh(new_comentario)
+
+    return {
+        "id": new_comentario.id,
+        "texto": new_comentario.texto,
+        "user_id": new_comentario.user_id,
+        "homenagem_id": new_comentario.homenagem_id,
+        "criado_em": new_comentario.criado_em,
+        "nome_usuario": current_user.nome
+    }
