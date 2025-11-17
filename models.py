@@ -11,6 +11,8 @@ class HomenagemModel(Base):
     mensagem = Column(Text, nullable=False)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
     image_url = Column(String(512), nullable=True)
+    velas = relationship("VelaModel", back_populates="homenagem", cascade="all, delete-orphan")
+    comentarios = relationship("ComentarioModel", back_populates="homenagem", cascade="all, delete-orphan")
     owner_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     owner = relationship("UsuarioModel", back_populates="homenagens")
 
@@ -35,3 +37,23 @@ class UsuarioModel(Base):
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
     memorias = relationship("MemoriaModel", back_populates="owner")
     homenagens = relationship("HomenagemModel", back_populates="owner")
+
+class VelaModel(Base):
+    __tablename__ = "velas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    homenagem_id = Column(Integer, ForeignKey("homenagens.id"), nullable=False)
+    user = relationship("UsuarioModel")
+    homenagem = relationship("HomenagemModel", back_populates="velas")
+
+class ComentarioModel(Base):
+    __tablename__ = "comentarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    texto = Column(Text, nullable=False)
+    criado_em = Column(DateTime(timezone=True), server_default=func.now())
+    user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    homenagem_id = Column(Integer, ForeignKey("homenagens.id"), nullable=False)
+    user = relationship("UsuarioModel")
+    homenagem = relationship("HomenagemModel", back_populates="comentarios")
