@@ -334,3 +334,29 @@ def create_comentario(
         "criado_em": new_comentario.criado_em,
         "nome_usuario": current_user.nome
     }
+
+@app.post("/users/me/avatar", response_model=schemas.Usuario)
+def upload_avatar(
+    file: UploadFile = File(...),
+    db: Session = Depends(database.get_db),
+    current_user: models.UsuarioModel = Depends(security.get_current_user)
+):
+    bucket_name = "imagem"
+    file_ext = file.filename.split(".")[-1]
+    file_name = f"avatar_{current_user.id}_{uuid.uuid4()}.{file_ext}"
+
+    try:
+        supabase_client.storage.from_(bucket_name).upload(
+            path=file_name,
+            file=file.file.read(),
+            file_options={"content-type": file.content_type}
+        )
+        public_url = supabase_client.storage.from_(bucket_name).get_public_url(file_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro no upload: {str(e)}")
+    
+    current_user.profile_pic_url = public_url
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user

@@ -74,6 +74,7 @@ class UsuarioCreate(UsuarioBase):
 class Usuario(UsuarioBase):
     id: int
     criado_em: datetime
+    profile_pic_url: Optional[str] = None
 
     class Config:
         from_attributes = True

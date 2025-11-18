@@ -11,6 +11,7 @@ class UsuarioModel(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
+    profile_pic_url = Column(String(512), nullable=True)
     memorias = relationship("MemoriaModel", back_populates="owner")
     homenagens = relationship("HomenagemModel", back_populates="owner")
 
@@ -41,7 +42,7 @@ class HomenagemModel(Base):
 
 class VelaModel(Base):
     __tablename__ = "velas"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     homenagem_id = Column(Integer, ForeignKey("homenagens.id"), nullable=False)
